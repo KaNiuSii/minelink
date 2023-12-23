@@ -37,4 +37,22 @@ export class DatabaseService {
       throw new Error('Error fetching link: ' + error.message);
     }
   }
+  async createLink(linkData: {
+    customName: string;
+    redirect: string;
+  }): Promise<any> {
+    try {
+      const { customName, redirect } = linkData;
+
+      const result = await this.client.query(
+        'INSERT INTO link(name, redirect) VALUES ($1, $2) RETURNING *',
+        [customName, redirect],
+      );
+
+      // Return the newly created row
+      return result.rows[0];
+    } catch (error) {
+      throw new Error('Error creating link: ' + error.message);
+    }
+  }
 }
