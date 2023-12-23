@@ -32,7 +32,7 @@ export class DatabaseService {
         'SELECT * FROM link WHERE id = $1',
         [id],
       );
-      return result;
+      return result.rows[0];
     } catch (error) {
       throw new Error('Error fetching link: ' + error.message);
     }
