@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { LinkController } from './controller/link/link.controller';
-import { DatabaseService } from './database/database.service';
+import { LinkController } from './link.controller';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, DatabaseModule],
   controllers: [LinkController],
-  providers: [DatabaseService],
 })
 export class LinkModule {}

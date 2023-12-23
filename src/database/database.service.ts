@@ -26,4 +26,15 @@ export class DatabaseService {
       throw new Error('Error fetching links: ' + error.message);
     }
   }
+  async getLinkById(id: number): Promise<any> {
+    try {
+      const result = await this.client.query(
+        'SELECT * FROM link WHERE id = $1',
+        [id],
+      );
+      return result;
+    } catch (error) {
+      throw new Error('Error fetching link: ' + error.message);
+    }
+  }
 }
