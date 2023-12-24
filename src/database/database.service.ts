@@ -49,7 +49,6 @@ export class DatabaseService {
         [customName, redirect],
       );
 
-      // Return the newly created row
       return result.rows[0];
     } catch (error) {
       throw new Error('Error creating link: ' + error.message);
