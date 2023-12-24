@@ -1,14 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Client } from 'pg';
 import { ConfigService } from '@nestjs/config';
 
+export const LinkTableName = 'link';
+
+interface LinkRecord {
+  id: string;
+  link: string;
+  redirect: string;
+}
+
+const mapRecordToLinkReadModel = (record: LinkRecord): LinkReadModel => {
+  return {
+    id: record.id,
+    link: record.link,
+    redirect: record.redirect,
+  };
+};
+
 @Injectable()
 export class DatabaseService {
-  private client: Client;
+  private client: Client; // kisely, knex
 
-  constructor(private configService: ConfigService) {
+  constructor(@Inject(ConfigService) private configService: ConfigService) {
     this.client = new Client({
-      host: this.configService.get<string>('DATABASE_HOST'),
+      host: this.configService.get<string>('DATABASE_HOST'), // pobieranie envów przez process.env.
       user: this.configService.get<string>('DATABASE_USER'),
       password: this.configService.get<string>('DATABASE_PASSWORD'),
       database: this.configService.get<string>('DATABASE_NAME'),
@@ -26,32 +42,19 @@ export class DatabaseService {
       throw new Error('Error fetching links: ' + error.message);
     }
   }
-  async getLinkById(id: number): Promise<any> {
-    try {
-      const result = await this.client.query(
-        'SELECT * FROM link WHERE id = $1',
-        [id],
-      );
-      return result.rows[0];
-    } catch (error) {
-      throw new Error('Error fetching link: ' + error.message);
-    }
+
+  async getLinkById(id: number): Promise<LinkReadModel | undefined> {
+    // await this.client.table(LinkTableName).select('*').where('id', id).first();
+    const result = await this.client.query('SELECT * FROM link WHERE id = $1', [
+      id,
+    ]);
+    return result ? mapRecordToLinkReadModel(result) : undefined;
   }
-  async createLink(linkData: {
-    customName: string;
-    redirect: string;
-  }): Promise<any> {
-    try {
-      const { customName, redirect } = linkData;
 
-      const result = await this.client.query(
-        'INSERT INTO link(name, redirect) VALUES ($1, $2) RETURNING *',
-        [customName, redirect],
-      );
-
-      return result.rows[0];
-    } catch (error) {
-      throw new Error('Error creating link: ' + error.message);
-    }
+  async insertLink(customName: string, redirect: string): Promise<void> {
+    await this.client.query(
+      'INSERT INTO link(name, redirect) VALUES ($1, $2)',
+      [customName, redirect],
+    );
   }
 }
