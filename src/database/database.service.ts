@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { Kysely, PostgresDialect } from 'kysely';
 
+export const LinkTableName = 'link';
+
 export interface Link {
   id: number;
   name: string;
@@ -31,12 +33,12 @@ export class DatabaseService {
   }
 
   async getAllLinks(): Promise<Link[]> {
-    return this.db.selectFrom('link').selectAll().execute();
+    return this.db.selectFrom(LinkTableName).selectAll().execute();
   }
 
   async getLinkById(id: number): Promise<Link | undefined> {
     return this.db
-      .selectFrom('link')
+      .selectFrom(LinkTableName)
       .selectAll()
       .where('id', '=', id)
       .executeTakeFirst();
@@ -44,7 +46,7 @@ export class DatabaseService {
 
   async getLinkByName(name: string): Promise<Link | undefined> {
     return this.db
-      .selectFrom('link')
+      .selectFrom(LinkTableName)
       .selectAll()
       .where('name', '=', name)
       .executeTakeFirst();
@@ -52,7 +54,7 @@ export class DatabaseService {
 
   async insertLink(name: string, redirect: string): Promise<void> {
     this.db
-      .insertInto('link')
+      .insertInto(LinkTableName)
       .values({ name, redirect })
       .returningAll()
       .executeTakeFirstOrThrow();
