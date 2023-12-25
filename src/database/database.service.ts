@@ -42,6 +42,14 @@ export class DatabaseService {
       .executeTakeFirst();
   }
 
+  async getLinkByName(name: string): Promise<Link | undefined> {
+    return this.db
+      .selectFrom('link')
+      .selectAll()
+      .where('name', '=', name)
+      .executeTakeFirst();
+  }
+
   async insertLink(name: string, redirect: string): Promise<void> {
     this.db
       .insertInto('link')

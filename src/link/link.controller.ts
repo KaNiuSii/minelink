@@ -27,11 +27,17 @@ export class LinkController {
     if (!links) throw new BadRequestException();
     return links;
   }
-  @Get(':id')
+  @Get('id/:id')
   async getAtId(@Param('id', ParseIntPipe) id: number) {
     const link = await this.databaseService.getLinkById(id);
-    if (link) return link;
-    throw new BadRequestException();
+    if (!link) throw new BadRequestException();
+    return link;
+  }
+  @Get('redirect/:name')
+  async getAtName(@Param('name') name: string) {
+    const link = await this.databaseService.getLinkByName(name);
+    if (!link) throw new BadRequestException();
+    return link.redirect;
   }
   @Post('/create')
   async createLink(@Body() createLinkDto: CreateLinkDto) {
