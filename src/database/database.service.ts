@@ -1,57 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { Client } from 'pg';
-import { ConfigService } from '@nestjs/config';
+import { Pool } from 'pg';
+import { Kysely, PostgresDialect } from 'kysely';
+
+export interface Link {
+  id: number;
+  name: string;
+  redirect: string;
+}
+
+interface Database {
+  link: Link;
+}
 
 @Injectable()
 export class DatabaseService {
-  private client: Client;
+  private db: Kysely<Database>;
 
-  constructor(private configService: ConfigService) {
-    this.client = new Client({
-      host: this.configService.get<string>('DATABASE_HOST'),
-      user: this.configService.get<string>('DATABASE_USER'),
-      password: this.configService.get<string>('DATABASE_PASSWORD'),
-      database: this.configService.get<string>('DATABASE_NAME'),
-      port: this.configService.get<number>('DATABASE_PORT'),
+  constructor() {
+    this.db = new Kysely<Database>({
+      dialect: new PostgresDialect({
+        pool: new Pool({
+          host: process.env.DATABASE_HOST,
+          user: process.env.DATABASE_USER,
+          password: process.env.DATABASE_PASSWORD,
+          database: process.env.DATABASE_NAME,
+          port: parseInt(process.env.DATABASE_PORT, 10),
+        }),
+      }),
     });
-
-    this.client.connect();
   }
 
-  async getAllLinks(): Promise<any[]> {
-    try {
-      const result = await this.client.query('SELECT * FROM link');
-      return result.rows;
-    } catch (error) {
-      throw new Error('Error fetching links: ' + error.message);
-    }
+  async getAllLinks(): Promise<Link[]> {
+    return this.db.selectFrom('link').selectAll().execute();
   }
-  async getLinkById(id: number): Promise<any> {
-    try {
-      const result = await this.client.query(
-        'SELECT * FROM link WHERE id = $1',
-        [id],
-      );
-      return result.rows[0];
-    } catch (error) {
-      throw new Error('Error fetching link: ' + error.message);
-    }
+
+  async getLinkById(id: number): Promise<Link | undefined> {
+    return this.db
+      .selectFrom('link')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
   }
-  async createLink(linkData: {
-    customName: string;
-    redirect: string;
-  }): Promise<any> {
-    try {
-      const { customName, redirect } = linkData;
 
-      const result = await this.client.query(
-        'INSERT INTO link(name, redirect) VALUES ($1, $2) RETURNING *',
-        [customName, redirect],
-      );
-
-      return result.rows[0];
-    } catch (error) {
-      throw new Error('Error creating link: ' + error.message);
-    }
+  async insertLink(name: string, redirect: string): Promise<void> {
+    this.db
+      .insertInto('link')
+      .values({ name, redirect })
+      .returningAll()
+      .executeTakeFirstOrThrow();
   }
 }
