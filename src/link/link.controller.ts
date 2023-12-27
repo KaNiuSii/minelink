@@ -28,28 +28,31 @@ export class LinkController {
     return links;
   }
   @Get('id/:id')
-  async getAtId(@Param('id', ParseIntPipe) id: number) {
+  async getById(@Param('id', ParseIntPipe) id: number) {
     const link = await this.databaseService.getLinkById(id);
     if (!link) throw new BadRequestException();
     return link;
   }
   @Get('name/:name')
-  async getNameAtName(@Param('name') name: string) {
+  async getNameByName(@Param('name') name: string) {
     const link = await this.databaseService.getLinkByName(name);
     if (!link) throw new BadRequestException();
-    return link.name;
+    return JSON.stringify(link.name);
   }
   @Get('redirect/:name')
-  async getRedirectAtName(@Param('name') name: string) {
+  async getRedirectByName(@Param('name') name: string) {
     const link = await this.databaseService.getLinkByName(name);
     if (!link) throw new BadRequestException();
-    return link.redirect;
+    return JSON.stringify(link.redirect);
   }
   @Post('/create')
   async createLink(@Body() createLinkDto: CreateLinkDto) {
-    const customName =
+    createLinkDto.name =
       createLinkDto.name ?? this.generateUniqueNameUseCase.call();
-    await this.databaseService.insertLink(customName, createLinkDto.redirect);
-    return customName;
+    await this.databaseService.insertLink(
+      createLinkDto.name,
+      createLinkDto.redirect,
+    );
+    return JSON.stringify(createLinkDto.name);
   }
 }
