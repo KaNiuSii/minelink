@@ -3,7 +3,7 @@ import { IsNotEmpty, IsUrl, IsOptional, IsString } from 'class-validator';
 export class CreateLinkDto {
   @IsOptional()
   @IsString()
-  customName?: string;
+  name?: string;
 
   @IsUrl()
   @IsNotEmpty()

@@ -33,8 +33,14 @@ export class LinkController {
     if (!link) throw new BadRequestException();
     return link;
   }
+  @Get('name/:name')
+  async getNameAtName(@Param('name') name: string) {
+    const link = await this.databaseService.getLinkByName(name);
+    if (!link) throw new BadRequestException();
+    return link.name;
+  }
   @Get('redirect/:name')
-  async getAtName(@Param('name') name: string) {
+  async getRedirectAtName(@Param('name') name: string) {
     const link = await this.databaseService.getLinkByName(name);
     if (!link) throw new BadRequestException();
     return link.redirect;
@@ -42,7 +48,7 @@ export class LinkController {
   @Post('/create')
   async createLink(@Body() createLinkDto: CreateLinkDto) {
     const customName =
-      createLinkDto.customName ?? this.generateUniqueNameUseCase.call();
+      createLinkDto.name ?? this.generateUniqueNameUseCase.call();
     await this.databaseService.insertLink(customName, createLinkDto.redirect);
     return customName;
   }
