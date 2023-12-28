@@ -24,35 +24,35 @@ export class LinkController {
   @Get('')
   async getAll() {
     const links = await this.databaseService.getAllLinks();
-    if (!links) throw new BadRequestException();
+    if (!links) {
+      throw new BadRequestException();
+    }
     return links;
   }
   @Get('id/:id')
   async getById(@Param('id', ParseIntPipe) id: number) {
     const link = await this.databaseService.getLinkById(id);
-    if (!link) throw new BadRequestException();
+    if (!link) {
+      throw new BadRequestException();
+    }
     return link;
-  }
-  @Get('name/:name')
-  async getNameByName(@Param('name') name: string) {
-    const link = await this.databaseService.getLinkByName(name);
-    if (!link) throw new BadRequestException();
-    return JSON.stringify(link.name);
   }
   @Get('redirect/:name')
   async getRedirectByName(@Param('name') name: string) {
     const link = await this.databaseService.getLinkByName(name);
-    if (!link) throw new BadRequestException();
-    return JSON.stringify(link.redirect);
+    if (!link) {
+      throw new BadRequestException();
+    }
+    return { redirect: link.redirect };
   }
   @Post('/create')
   async createLink(@Body() createLinkDto: CreateLinkDto) {
-    createLinkDto.name =
-      createLinkDto.name ?? this.generateUniqueNameUseCase.call();
-    await this.databaseService.insertLink(
-      createLinkDto.name,
-      createLinkDto.redirect,
-    );
-    return JSON.stringify(createLinkDto.name);
+    const name = createLinkDto.name ?? this.generateUniqueNameUseCase.call();
+    const link = await this.databaseService.getLinkByName(name);
+    if (!link) {
+      throw new BadRequestException();
+    }
+    await this.databaseService.insertLink(name, createLinkDto.redirect);
+    return { name: name };
   }
 }
