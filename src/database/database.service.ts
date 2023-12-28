@@ -56,7 +56,7 @@ export class DatabaseService {
     this.db
       .insertInto(LinkTableName)
       .values({ name, redirect })
-      .returningAll()
+      .returningAll() //TODO: po co?
       .executeTakeFirstOrThrow();
   }
 }
