@@ -47,14 +47,11 @@ export class LinkController {
   }
   @Post('/create')
   async createLink(@Body() createLinkDto: CreateLinkDto) {
-    console.log(createLinkDto);
     const name =
       createLinkDto.name && createLinkDto.name !== ''
         ? createLinkDto.name
         : this.generateUniqueNameUseCase.call();
-    console.log(name);
     const link = await this.databaseService.getLinkByName(name);
-    console.log(link);
     if (link) {
       throw new BadRequestException();
     }
