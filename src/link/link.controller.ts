@@ -47,6 +47,9 @@ export class LinkController {
   }
   @Post('/create')
   async createLink(@Body() createLinkDto: CreateLinkDto) {
+    if (createLinkDto.redirect === '') {
+      throw new BadRequestException();
+    }
     const name =
       createLinkDto.name && createLinkDto.name !== ''
         ? createLinkDto.name
