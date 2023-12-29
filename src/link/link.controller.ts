@@ -11,6 +11,7 @@ import {
 import { DatabaseService } from '../database/database.service';
 import { CreateLinkDto } from './create-link.dto';
 import { GenerateUniqueNameUseCase } from './generate-unique-name.use-case';
+import { log } from 'console';
 
 @Controller('link')
 export class LinkController {
@@ -47,9 +48,15 @@ export class LinkController {
   }
   @Post('/create')
   async createLink(@Body() createLinkDto: CreateLinkDto) {
-    const name = createLinkDto.name ?? this.generateUniqueNameUseCase.call();
+    console.log(createLinkDto);
+    const name =
+      createLinkDto.name && createLinkDto.name !== ''
+        ? createLinkDto.name
+        : this.generateUniqueNameUseCase.call();
+    console.log(name);
     const link = await this.databaseService.getLinkByName(name);
-    if (!link) {
+    console.log(link);
+    if (link) {
       throw new BadRequestException();
     }
     await this.databaseService.insertLink(name, createLinkDto.redirect);
