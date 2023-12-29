@@ -11,7 +11,6 @@ import {
 import { DatabaseService } from '../database/database.service';
 import { CreateLinkDto } from './create-link.dto';
 import { GenerateUniqueNameUseCase } from './generate-unique-name.use-case';
-import { log } from 'console';
 
 @Controller('link')
 export class LinkController {
